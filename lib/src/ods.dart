@@ -7,7 +7,7 @@
 //   - spanned columns
 //   - hidden rows (visible in resulting table)
 //   - hidden columns (visible in resulting table)
-part of spreadsheet_decoder;
+part of '../spreadsheet_decoder.dart';
 
 const String contentXML = 'content.xml';
 
@@ -96,8 +96,10 @@ class OdsDecoder extends SpreadsheetDecoder {
 
   void _parseContent() {
     var file = _archive.findFile(contentXML);
-    file?.decompress();
-    var content = XmlDocument.parse(utf8.decode(file?.content));
+
+    if(file == null) throw('_parseContent : "$contentXML" not found!');
+    file.decompress();
+    var content = XmlDocument.parse(utf8.decode(file.content));
     if (_update == true) {
       _archiveFiles = <String, ArchiveFile>{};
       _sheets = <String, XmlElement>{};

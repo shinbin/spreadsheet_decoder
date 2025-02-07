@@ -1,4 +1,4 @@
-part of spreadsheet_decoder;
+part of '../spreadsheet_decoder.dart';
 
 const String _relationships =
     'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
@@ -305,8 +305,9 @@ class XlsxDecoder extends SpreadsheetDecoder {
 
   void _parseContent() {
     var workbook = _archive.findFile('xl/workbook.xml');
-    workbook?.decompress();
-    var document = XmlDocument.parse(utf8.decode(workbook?.content));
+    if(workbook == null) throw('_parseContent : "xl/workbook.xml" not found!');
+    workbook.decompress();
+    var document = XmlDocument.parse(utf8.decode(workbook.content));
     document.findAllElements('sheet').forEach((node) {
       _parseTable(node);
     });
@@ -321,9 +322,11 @@ class XlsxDecoder extends SpreadsheetDecoder {
     final namePath =
         target.startsWith('/') ? target.substring(1) : 'xl/$target';
     var file = _archive.findFile(namePath);
-    file?.decompress();
 
-    var content = XmlDocument.parse(utf8.decode(file?.content));
+    if(file == null) throw('_parseTable : "$namePath" not found!');
+
+    file.decompress();
+    var content = XmlDocument.parse(utf8.decode(file.content));
     var worksheet = content.findElements('worksheet').first;
     var sheet = worksheet.findElements('sheetData').first;
 
@@ -446,7 +449,7 @@ class XlsxDecoder extends SpreadsheetDecoder {
 
     for (var child in node.children) {
       if (child is XmlText) {
-        buffer.write(_normalizeNewLine(child.text));
+        buffer.write(_normalizeNewLine(child.value));
       }
     }
 
